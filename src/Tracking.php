@@ -26,7 +26,7 @@ class Tracking {
 		$this->initalized = true;
 		$this->tracking = new Tracks( 'jetpack' );
 
-		// For tracking stuff via js/ajax
+		// For tracking stuff via js/ajax.
 		add_action( 'admin_enqueue_scripts', array( $this->tracking, 'enqueue_tracks_scripts' ) );
 
 		add_action( 'jetpack_activate_module', array( $this, 'jetpack_activate_module' ), 1, 1 );
@@ -34,12 +34,17 @@ class Tracking {
 		add_action( 'jetpack_user_authorized', array( $this, 'jetpack_user_authorized' ) );
 		add_action( 'wp_login_failed', array( $this, 'wp_login_failed' ) );
 
+		// Tracking for remote user authorization.
+		add_action( 'jetpack_remote_authorize_begin', array( $this, 'jetpack_remote_authorize_begin' ) );
+		add_action( 'jetpack_remote_authorize_success', array( $this, 'jetpack_remote_authorize_success' ) );
+		add_action( 'jetpack_remote_authorize_fail', array( $this, 'jetpack_remote_authorize_fail' ), 10, 2 );
+
 		// Track that we've begun verifying the previously generated secret.
 		add_action( 'jetpack_verify_secrets_begin', array( $this, 'jetpack_verify_secrets_begin' ), 10, 2 );
 		add_action( 'jetpack_verify_secrets_success', array( $this, 'jetpack_verify_secrets_success' ), 10, 2 );
 		add_action( 'jetpack_verify_secrets_fail', array( $this, 'jetpack_verify_secrets_fail' ), 10, 3 );
 
-		// Universal ajax callback for all tracking events triggered via js
+		// Universal ajax callback for all tracking events triggered via js.
 		add_action( 'wp_ajax_jetpack_tracks', array( $this, 'wp_ajax_jetpack_tracks' ) );
 
 		add_action( 'jetpack_verify_api_authorization_request_error_double_encode', array( $this, 'jetpack_verify_api_authorization_request_error_double_encode' ) );
@@ -94,11 +99,46 @@ class Tracking {
 	}
 
 	/**
+	 * Track that we've begun authorizing the user.
+	 *
+	 * @param \WP_User $user The user object.
+	 */
+	public function jetpack_remote_authorize_begin( $user ) {
+		$this->tracking->record_user_event( 'jpc_remote_authorize_begin', array(), $user );
+	}
+
+	/**
+	 * Track that we've succeeded in authorizing the user.
+	 *
+	 * @param \WP_User $user The user object.
+	 */
+	public function jetpack_remote_authorize_success( $user ) {
+		$this->tracking->record_user_event( 'jpc_remote_authorize_success', array(), $user );
+	}
+
+	/**
+	 * Track that we've failed to authorize the user.
+	 *
+	 * @param \WP_Error $error The error object.
+	 * @param \WP_User  $user The user object.
+	 */
+	public function jetpack_remote_authorize_fail( $error, $user ) {
+		$this->record_user_event(
+			'jpc_remote_authorize_fail',
+			array(
+				'error_code'    => $error->get_error_code(),
+				'error_message' => $error->get_error_message(),
+			),
+			$user
+		);
+	}
+
+	/**
 	 * Track that we've begun verifying the secrets.
 	 *
 	 * @access public
 	 *
-	 * @param string $action Type of secret (one of 'register', 'authorize', 'publicize').
+	 * @param string   $action Type of secret (one of 'register', 'authorize', 'publicize').
 	 * @param \WP_User $user The user object.
 	 */
 	public function jetpack_verify_secrets_begin( $action, $user ) {
@@ -110,7 +150,7 @@ class Tracking {
 	 *
 	 * @access public
 	 *
-	 * @param string $action Type of secret (one of 'register', 'authorize', 'publicize').
+	 * @param string   $action Type of secret (one of 'register', 'authorize', 'publicize').
 	 * @param \WP_User $user The user object.
 	 */
 	public function jetpack_verify_secrets_success( $action, $user ) {
@@ -122,8 +162,8 @@ class Tracking {
 	 *
 	 * @access public
 	 *
-	 * @param string $action Type of secret (one of 'register', 'authorize', 'publicize').
-	 * @param \WP_User $user The user object.
+	 * @param string    $action Type of secret (one of 'register', 'authorize', 'publicize').
+	 * @param \WP_User  $user The user object.
 	 * @param \WP_Error $error Error object.
 	 */
 	public function jetpack_verify_secrets_fail( $action, $user, $error ) {
