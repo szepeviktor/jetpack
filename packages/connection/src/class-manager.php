@@ -332,10 +332,12 @@ class Manager {
 		@list( $token_key, $version, $user_id ) = explode( ':', wp_unslash( $_GET['token'] ) );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
+		$jp_api_version = Utils::get_jetpack_api_version();
+
 		if (
 			empty( $token_key )
 		||
-			empty( $version ) || strval( JETPACK__API_VERSION ) !== $version
+			empty( $version ) || strval( $jp_api_version ) !== $version
 		) {
 			return new \WP_Error( 'malformed_token', 'Malformed token in request', compact( 'signature_details' ) );
 		}
@@ -714,10 +716,10 @@ class Manager {
 	 */
 	public function api_url( $relative_url ) {
 		$api_base = Constants::get_constant( 'JETPACK__API_BASE' );
-		$version  = Constants::get_constant( 'JETPACK__API_VERSION' );
+		$version  = Utils::get_jetpack_api_version();
 
 		$api_base = $api_base ? $api_base : 'https://jetpack.wordpress.com/jetpack.';
-		$version  = $version ? '/' . $version . '/' : '/1/';
+		$version  = '/' . $version . '/';
 
 		/**
 		 * Filters the API URL that Jetpack uses for server communication.

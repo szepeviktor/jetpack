@@ -85,6 +85,7 @@ if ( ! function_exists( __NAMESPACE__ . '\autoloader' ) ) {
 						'Jetpack_XMLRPC_Server',
 						'Automattic\Jetpack\Constants',
 						'Automattic\Jetpack\Tracking',
+						'Automattic\Jetpack\Connection\Utils',
 					),
 					true
 				);
