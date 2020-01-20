@@ -29,3 +29,9 @@
 		font-weight: bold;
 	}
 }
+
+[data-align="wide"], [data-align="full"] {
+	.wp-block-jetpack-calendly .wp-block-button__link {
+		width: 100%;
+	}
+}

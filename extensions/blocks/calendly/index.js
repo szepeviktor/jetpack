@@ -28,6 +28,7 @@ export const settings = {
 		__( 'appointments', 'jetpack' ),
 	],
 	supports: {
+		align: true,
 		html: false,
 	},
 	edit,
